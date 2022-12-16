@@ -1,0 +1,175 @@
+<script src="./app.js"></script>
+<template id="app-main" view-model="App">
+  <!-- <div inner-text$.="title"></div> -->
+  <div class="app">
+    <div class="table">
+      <div class="grid">
+        <div class="player" for.="player of gridplayers">
+          <div if.="player">
+            <div class-current.="player.isCurrent">
+              <div class="cards sendedCards">
+                <div for.="s of player.sendedCards">
+                  <div class="card" class-hidden.="s[1]" class-controller.="player === controller" class-wined.="player.winedCards.has(s[0])">
+                    <span inner-text$.="s[0].type + s[0].value">
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div if.="controller == player">
+              <div class="cards holdcards">
+                <div for.="card of player.cards">
+                  <div class="card" class-selected.="card.isSelected" onclick.="player.toggleCard(card)">
+                    <span inner-text$.="card.type + card.value"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="buttons">
+        <input type="button" onclick.="restart()" value="重来">
+        <input type="button" disabled value.="'总分: ' + totalScore">
+        <input type="button" onclick.="toogleAutoplay()" value.="autoplay ? '关闭托管':'开始托管'">
+        <input if.="playing && !autoplay" type="button" onclick.="send(true)" value="要不起">
+        <input if.="!autoplay" type="button" onclick.="send()" value.="playing ? '出牌':'开始'">
+      </div>
+    </div>
+  </div>
+  <modal-panel id="modal"></modal-panel>
+  <style>
+    :host {
+      display: block;
+    }
+
+    .table{
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-rows: auto 1fr auto;
+      flex: 1;
+    }
+
+    .app {}
+
+    .player{
+      font-size: x-small;
+      margin-bottom: 0.4em;
+    }
+
+    .grid>.player:nth-child(4) >div,.grid>.player:nth-child(6) >div{
+      flex: 1;
+      display: flex;
+    }
+
+    .grid>.player:nth-child(4) >div > div, .grid>.player:nth-child(6) >div > div{
+      display: flex;
+      flex: 1;
+    }
+
+    .holdcards{
+      font-size: small;
+    }
+
+    .cards {
+      display: flex;
+      flex-direction: row;
+      height: 3em;
+      margin-bottom: 1px;
+    }
+
+    .sendedCards{
+      /* font-size: x-small; */
+      margin: 0.2em 0;
+      justify-items: center;
+    }
+
+    .card {
+      border: 1px solid #198754c0;
+      border-radius: 4px;
+      width: 2em;
+      height: 2.8em;
+      display: flex;
+      align-items: center;
+      background: #fff;
+      justify-content: center;
+      margin-left: 1px;
+      /* box-sizing: border-box; */
+    }
+
+    .grid>.player:nth-child(4), .grid>.player:nth-child(6){
+      display: flex;
+    }
+    .grid>.player:nth-child(4) .cards, .grid>.player:nth-child(6) .cards{
+      flex-direction: column;
+      height: unset;
+      width: 3.2em;
+    }
+
+    .grid>.player:nth-child(4) .card, .grid>.player:nth-child(6) .card{
+      height: 2em;
+      width: 2.8em;
+      margin-top: 1px;
+    }
+
+    .card.hidden{
+      color: transparent;
+      background: #198754c0;
+    }
+
+    .controller.card.hidden{
+      color: unset;
+      background: #198754c0;
+      /* opacity: 0.75; */
+    }
+
+    /* .sendedCards .card{
+      background: #eee;
+    }
+
+    .sendedCards  .card.hidden{
+      background: #456456c0;
+    } */
+
+    .card.wined{
+      background: #f0808040;
+      border-color: #f08080c0;
+    }
+
+    .card.selected{
+      border-width: 2;
+      border-color: #ffc107;
+      /* border-color: #000; */
+    }
+
+    .sendedCards{
+      background: #19875410;
+      /* padding: 2px 0; */
+    }
+
+    .current .sendedCards{
+      background: #19875420;
+    }
+
+    .buttons{
+      position: fixed;
+      left: 50%;
+      top: 45%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+    }
+    .buttons input{
+      margin: 5px;
+    }
+  </style>
+</template>
+<script>
+  window.appData = window.appData || /**@imports json */ './app-data.json'
+</script>

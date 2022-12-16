@@ -1,0 +1,142 @@
+<script src="./app.js"></script>
+<template id="app-main" view-model="App">
+  <!-- <div inner-text$.="title"></div> -->
+  <div class="app" style---cell-size$.="cellSize" onclick.="window.app.isSuccess && window.app.startNext()"
+    style---cell-font-size$.="cellFontSize">
+    <div id="grid" class="grid" class-show-input.="showInput" if.="puzzle">
+      <div class="line" for.="line of puzzle.cells">
+        <div class="cell" class-readonly.="cell.readonly" onclick.="cell && selectCell(cell)"
+          class-current.="cell && cell == currentCell" class-wrong.="cell && cell.input && cell.letter !== cell.input"
+          class-value.="cell" for.="cell of line">
+          <div if.="cell"><span inner-text$.="cell.input||''"></span></div>
+          <div if.="!cell"></div>
+        </div>
+      </div>
+    </div>
+    <div class="inputs-bg" onclick.="showInput=false" if.="showInput && currentCell">
+      <div class="inputs-panel">
+        <div class="clues across" if.="currentCell.across">
+          <span>CROSS: </span><span inner-text$.="currentCell.across"></span>
+        </div>
+        <div class="inputs" onclick="event.stopPropagation()" if.="!currentCell.readonly">
+          <div class="input" for.="input of inputs" onclick.="inputCell(input)">
+            <span inner-text$.="input"></span>
+          </div>
+        </div>
+        <div class="clues down" if.='currentCell.down'>
+          <span>DOWN: </span><span inner-text$.="currentCell.down"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <modal-panel id="modal"></modal-panel>
+  <style>
+    :host {
+      display: block;
+    }
+
+    .app {
+      --cell-size: 1em;
+      --cell-font-size: 2em;
+      color: #666;
+    }
+
+    .inputs-bg {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      /* background: #0001; */
+    }
+
+    .inputs-panel {
+      /* background: #fff; */
+      /* backdrop-filter: blur(1px); */
+      /* padding: 0.5em 1em; */
+      font-weight: bold;
+      font-family: serif;
+    }
+
+    .clues {
+      padding: 5px;
+      text-align: center;
+      font-size: small;
+    }
+
+    .inputs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      color: #888;
+    }
+
+    .input {
+      margin: 2px;
+      background: #fff;
+      border-radius: 4px;
+      filter: drop-shadow(1px 2px 3px #0008);
+      font-size: 1em;
+      width: 2em;
+      height: 1.5em;
+      text-align: center;
+    }
+
+    .grid {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .line {
+      display: flex;
+      align-self: center;
+    }
+
+    .cell {
+      flex: 1;
+      /* background: #fff8; */
+      text-align: center;
+      box-sizing: border-box;
+      height: var(--cell-size);
+      width: var(--cell-size);
+      font-size: var(--cell-font-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .cell.value {
+      background: #0001;
+      pointer-events: initial;
+    }
+
+    .cell.readonly {
+      color: #888;
+    }
+
+    .cell.current {
+      /* outline: 1px solid #aaa; */
+      background: #0002;
+    }
+
+    .cell.wrong {
+      color: lightcoral;
+    }
+
+    .show-input .cell {
+      color: transparent;
+    }
+  </style>
+</template>
+<script>
+  window.appData = window.appData || /**@imports json */ './app-data.json'
+</script>

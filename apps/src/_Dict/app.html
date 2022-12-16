@@ -1,0 +1,178 @@
+<script src="./app.js"></script>
+<template id="app-main" view-model="App">
+  <div id="app">
+    <div id="txbInput" inner-text$.="query" onclick="window.app.showKeyboard=true"></div>
+    <div class="input-panel" if.="showKeyboard">
+      <div class="input-line" for.="line of inputs" onclick="event.stopPropagation()">
+        <div class.="input" for.="input of line">
+          <div class="input" onclick.="click(input)">
+            <span><span inner-text$.="input"></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content" if.="url">
+      <div inner-HTML$.="url"></div>
+    </div>
+  </div>
+  <modal-panel id="modal"></modal-panel>
+  <style>
+    :host {
+      display: block;
+    }
+
+    #app {
+      /* background: #0008;
+      padding: 0 10px; */
+      padding: 10px;
+    }
+
+    #txbInput {
+      padding: 0 6px;
+      border-radius: 4px;
+      border: 1px solid #0008;
+      font-size: 1.2rem;
+      color: 666;
+      /* background: #fff8; */
+      height: 1.8em;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-panel {
+      display: flex;
+      flex-direction: column;
+      margin: 5px 0;
+      color: 888;
+      user-select: none;
+    }
+
+    .input-line {
+      /* align-self: center; */
+      display: flex;
+    }
+
+    .input-line>* {
+      margin: 2px;
+      flex: 1;
+    }
+
+    .input {
+      filter: drop-shadow(1px 2px 3px #666);
+      background: #fff;
+      height: 1.5em;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .DEL>.input {
+      background: #ffc107;
+      color: white;
+    }
+
+    .DEL>.input>span>span {
+      display: none;
+    }
+
+    .DEL>.input>span::before {
+      content: "⇦";
+      display: block;
+      color: white;
+    }
+
+    .RET>.input {
+      background: #198754;
+      color: white;
+    }
+
+    .RET>.input>span>span {
+      display: none;
+    }
+
+    .RET>.input>span::before {
+      content: "↩";
+      display: block;
+      color: white;
+    }
+
+    .SPC {
+      flex: 2;
+    }
+
+    .SPC>.input {
+      color: transparent;
+    }
+
+    .Z,
+    .M {
+      flex: 1.25;
+    }
+
+    .M {}
+
+    .word-item {
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+      background: #fff8;
+    }
+
+    .word {
+      font-size: 1.5em;
+      font-weight: bold;
+      font-family: monospace;
+      margin: 5px 0;
+    }
+
+    .phonetic {
+      margin: 0 5px;
+      font-size: 1rem;
+      font-weight: normal;
+    }
+
+    .origin {
+      margin-left: 1em;
+      background: #0001;
+      padding: 0 5px;
+      border-radius: 0 8px 8px 0;
+      font-family: monospace;
+    }
+
+    .meanings {}
+
+    .meaning-item {
+      border-top: 1px solid #0006;
+      margin-top: 1em;
+      padding-top: 5px;
+    }
+
+    .partOfSpeech {
+      font-family: monospace;
+      font-size: small;
+      opacity: 0.6;
+    }
+
+    .definitions {}
+
+    .definition-item {
+      background: #0001;
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 4px;
+    }
+
+    .definition {
+      font-weight: bold;
+      font-family: monospace;
+    }
+
+    .example {
+      font-style: italic;
+      font-size: small;
+      margin-top: 5px;
+    }
+  </style>
+</template>
+<script>
+  window.appData = window.appData || /**@imports json */ './app-data.json'
+</script>

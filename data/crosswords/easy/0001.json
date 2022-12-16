@@ -1,0 +1,11 @@
+{
+    "author": "Balabala",
+    "data": [
+        { "across": 1, "x": 0, "y": 2, "word": "SOCCER", "clue": "You kick a black and white ball." },
+        { "across": 1, "x": 2, "y": 4, "word": "TENNIS", "clue": "You need a racket and a net." },
+        { "across": 1, "x": 0, "y": 7, "word": "BASKETBALL", "clue": "You throw the ball into a basket." },
+        { "across": 0, "x": 3, "y": 0, "word": "HOCKEY", "clue": "A sport you play in an ice rink." },
+        { "across": 0, "x": 7, "y": 2, "word": "BASEBALL", "clue": "You need a glove and a bat." },
+        { "across": 0, "x": 2, "y": 7, "word": "SKI", "clue": "A winter sport." }
+    ]
+}

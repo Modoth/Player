@@ -1,0 +1,157 @@
+<template id="react-game-template" view-model="ReactGameTemplate">
+    <div id="app">
+        <div class="image-bg">
+            <img if.="imageBg" src$.="imageBg">
+        </div>
+        <div id="head" class="space">
+            <div class="space"></div>
+            <div class="menus">
+                <span class="button" for.="item of upmenus"><span inner-text$.="item.name"
+                        onclick.="item.onclick()"></span></span>
+            </div>
+            <div class="space"></div>
+            <div class="space"></div>
+        </div>
+        <div id="body">
+            <div id="left" class="space"></div>
+            <div id="app-content">
+                <slot></slot>
+            </div>
+            <div id="right" class="space"></div>
+        </div>
+        <div id="foot" class="space">
+            <div class="space"></div>
+            <div class="space"></div>
+            <div class="menus">
+                <span class="button" for.="item of downmenus"><span inner-text$.="item.name"
+                        onclick.="item.onclick()"></span></span>
+            </div>
+            <div class="space"></div>
+        </div>
+    </div>
+    <modal-panel id="modal"></modal-panel>
+    <style>
+        :host {
+            display: block;
+        }
+
+        #app {
+            flex-direction: column;
+            height: 100%;
+        }
+
+        #app,
+        #body {
+            display: flex;
+        }
+
+        #head,
+        #foot,
+        #left,
+        #right,
+        .space {
+            flex: 1;
+        }
+
+        #head,
+        #foot {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .menus {
+            display: flex;
+            justify-content: center;
+        }
+
+        .menus>* {
+            margin: 10px;
+            text-align: center;
+            user-select: none;
+        }
+
+        .button {
+            background: var(--app-menu-bg);
+            color: var(--app-menu-fg);
+            padding: 4px 8px;
+            border-radius: 2px 10px;
+            box-shadow: 2px 1px #0004;
+            font-size: large;
+            opacity: 0.9;
+        }
+
+        .image-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background: var(--app-bg);
+        }
+
+        .image-bg>img {
+            filter: blur(20px);
+            width: 100%;
+            height: 100%;
+        }
+
+        #app-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 90vw;
+            height: 90vw;
+            max-height: 90vh;
+        }
+
+        .cell-bg {
+            width: calc(100% - 6px);
+            object-fit: fill;
+            filter: drop-shadow(1px 2px 3px #0008);
+            padding: 3px;
+            background: white;
+        }
+
+        @media (orientation: landscape) {
+            #app {
+                flex-direction: row;
+            }
+
+            #body {
+                flex-direction: column;
+            }
+
+            #app-content {
+                width: 90vh;
+                height: 90vh;
+                max-width: 90vw;
+            }
+
+            #head,
+            #foot {
+                flex-direction: row;
+            }
+
+            .menus {
+                flex-direction: column;
+            }
+        }
+    </style>
+</template>
+
+<script>
+    class ReactGameTemplate {
+        constructor() {
+            registerProperties(this, 'upmenus', 'downmenus', 'modal', 'imageBg')
+            this.upmenus = []
+            this.downmenus = []
+            this.imageBg = undefined
+        }
+    }
+</script>

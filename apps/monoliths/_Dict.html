@@ -1,0 +1,1051 @@
+<html>
+  <meta charset="utf-8" />
+
+  <script>
+    class App {
+      constructor() {
+        /** @type { Object.<string,HTMLElement> } */
+        this.components;
+        registerProperties(this, "showKeyboard", "inputs", "query", "url");
+      }
+
+      initData() {}
+      start() {
+        /** @type { { toast:(msg:string, timeout:number = 1000)=>Promise<any> } } */
+        this.modal_ = this.components.modal.model;
+        this.title = "hello";
+        this.showKeyboard = false;
+        this.query = "";
+        this.url = "";
+        this.inputs = [
+          [..."QWERTYUIOP", "DEL"],
+          [..."ASDFGHJKL", "RET"],
+          [..."ZXCV", "SPC", ..."BNM"],
+        ];
+        // this.search()
+      }
+
+      click(key) {
+        switch (key) {
+          case "RET":
+            this.search();
+            break;
+          case "DEL":
+            this.query = this.query.slice(0, this.query.length - 2);
+            break;
+          case "SPC":
+            this.query += " ";
+            break;
+          default:
+            this.query += key.toLowerCase();
+        }
+      }
+
+      async search() {
+        this.showKeyboard = false;
+        this.url = undefined;
+        const query = this.query.trim();
+        if (!query) {
+          return;
+        }
+        let content = "";
+        try {
+          content = await (
+            await fetch(
+              `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
+                query
+              )}`,
+              { mode: "cors" }
+            )
+          ).json();
+        } catch {
+          content = "NotFound";
+        }
+        let html = content
+          .map(
+            (w) => `<div class="word-item">
+    <div class="word">${w.word || ""}<span class="phonetic">${
+              w.phonetic || ""
+            }</span></div>
+    <div class="origin">${w.origin || ""}</div>
+    <div class="meanings">${
+      !w.meanings
+        ? ""
+        : w.meanings
+            .map(
+              (m) => `<div class="meaning-item">
+    <div class="partOfSpeech">${m.partOfSpeech || ""}</div>
+    <div class="definitions">${
+      !m.definitions
+        ? ""
+        : m.definitions
+            .map(
+              (d) => `<div class="definition-item">
+    <div class="definition">${d.definition || ""}</div>
+    <div class="example">${d.example || ""}</div>
+    </div>`
+            )
+            .join("\n")
+    }</div>
+    </div>`
+            )
+            .join("\n")
+    }</div>
+    </div>`
+          )
+          .join("\n");
+        this.url = html;
+        // this.url = `data:text/html,${encodeURIComponent(html)}`
+      }
+    }
+  </script>
+  <template id="app-main" view-model="App">
+    <div id="app">
+      <div
+        id="txbInput"
+        inner-text$.="query"
+        onclick="window.app.showKeyboard=true"
+      ></div>
+      <div class="input-panel" if.="showKeyboard">
+        <div
+          class="input-line"
+          for.="line of inputs"
+          onclick="event.stopPropagation()"
+        >
+          <div class.="input" for.="input of line">
+            <div class="input" onclick.="click(input)">
+              <span><span inner-text$.="input"></span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="content" if.="url">
+        <div inner-HTML$.="url"></div>
+      </div>
+    </div>
+    <modal-panel id="modal"></modal-panel>
+    <style>
+      :host {
+        display: block;
+      }
+
+      #app {
+        /* background: #0008;
+      padding: 0 10px; */
+        padding: 10px;
+      }
+
+      #txbInput {
+        padding: 0 6px;
+        border-radius: 4px;
+        border: 1px solid #0008;
+        font-size: 1.2rem;
+        color: 666;
+        /* background: #fff8; */
+        height: 1.8em;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-panel {
+        display: flex;
+        flex-direction: column;
+        margin: 5px 0;
+        color: 888;
+        user-select: none;
+      }
+
+      .input-line {
+        /* align-self: center; */
+        display: flex;
+      }
+
+      .input-line > * {
+        margin: 2px;
+        flex: 1;
+      }
+
+      .input {
+        filter: drop-shadow(1px 2px 3px #666);
+        background: #fff;
+        height: 1.5em;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .DEL > .input {
+        background: #ffc107;
+        color: white;
+      }
+
+      .DEL > .input > span > span {
+        display: none;
+      }
+
+      .DEL > .input > span::before {
+        content: "⇦";
+        display: block;
+        color: white;
+      }
+
+      .RET > .input {
+        background: #198754;
+        color: white;
+      }
+
+      .RET > .input > span > span {
+        display: none;
+      }
+
+      .RET > .input > span::before {
+        content: "↩";
+        display: block;
+        color: white;
+      }
+
+      .SPC {
+        flex: 2;
+      }
+
+      .SPC > .input {
+        color: transparent;
+      }
+
+      .Z,
+      .M {
+        flex: 1.25;
+      }
+
+      .M {
+      }
+
+      .word-item {
+        border-radius: 8px;
+        padding: 10px;
+        margin: 10px 0;
+        background: #fff8;
+      }
+
+      .word {
+        font-size: 1.5em;
+        font-weight: bold;
+        font-family: monospace;
+        margin: 5px 0;
+      }
+
+      .phonetic {
+        margin: 0 5px;
+        font-size: 1rem;
+        font-weight: normal;
+      }
+
+      .origin {
+        margin-left: 1em;
+        background: #0001;
+        padding: 0 5px;
+        border-radius: 0 8px 8px 0;
+        font-family: monospace;
+      }
+
+      .meanings {
+      }
+
+      .meaning-item {
+        border-top: 1px solid #0006;
+        margin-top: 1em;
+        padding-top: 5px;
+      }
+
+      .partOfSpeech {
+        font-family: monospace;
+        font-size: small;
+        opacity: 0.6;
+      }
+
+      .definitions {
+      }
+
+      .definition-item {
+        background: #0001;
+        margin: 5px 0;
+        padding: 5px;
+        border-radius: 4px;
+      }
+
+      .definition {
+        font-weight: bold;
+        font-family: monospace;
+      }
+
+      .example {
+        font-style: italic;
+        font-size: small;
+        margin-top: 5px;
+      }
+    </style>
+  </template>
+  <script>
+    window.appData = window.appData || {};
+  </script>
+
+  <meta
+    name="viewport"
+    content="width=device-width, maximum-scale=1.0,user-scalable=no, initial-scale=1"
+  />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="transparent" />
+  <script>
+    const { registerElement, registerProperties } = (() => {
+      const evalInContext = (exp, context) => {
+        return function () {
+          with (this) {
+            try {
+              return eval(`(${exp})`);
+            } catch (e) {
+              return;
+            }
+          }
+        }.call(context);
+      };
+
+      const onprop = (exp, context, listener) => {
+        const tokens = exp.split(".");
+        if (tokens[1]) {
+          if (context.tmpCtxName === tokens[0]) {
+            const tmpCtx = context[context.tmpCtxName];
+            if (tmpCtx && tmpCtx.on) {
+              tmpCtx.on(tokens[1], listener);
+            }
+          }
+        } else {
+          context.on && context.on(tokens[0], listener);
+        }
+      };
+
+      const bindingForInstruction = (/**@type HTMLElement */ element) => {
+        let forExp = element.getAttribute("for.");
+        const match = forExp.match(
+          /^\s*(((let|const|of)\s+)?(\w+)\s+(of|in)\s+)?\s*([\w.]+)\s*$/
+        );
+        if (!match || !match[6]) {
+          throw new Error("Invalid for Expression");
+        }
+        const collectionName = match[6];
+        const of_in = match[5] || "of";
+        let varName = match[4];
+        let forHead;
+        if (varName) {
+          forHead = `for(const ${varName} ${of_in} ${collectionName})`;
+        } else {
+          varName = "$$i";
+          forHead = `for(const ${varName} of ${collectionName})`;
+        }
+        const comment = document.createComment(element.outerHTML);
+        const parent = element.parentElement;
+        parent.insertBefore(comment, element);
+        element.remove();
+        /**@type Map<any, HTMLElement> */
+        let items = new Map();
+        /**@type Map<any, HTMLElement> */
+        let newItems = new Map();
+        let idx = 0;
+        let allRemoved = false;
+        const update = () => {
+          (function ($$forEach) {
+            newItems = new Map();
+            idx = 0;
+            allRemoved = false;
+            with (this) {
+              eval(`
+          if (this.${collectionName}) {
+            ${forHead}{
+              $$forEach(${varName})
+              }
+          }`);
+            }
+            for (const [_, { item }] of items) {
+              item.remove();
+            }
+            items = newItems;
+          }.call(element.context, ($$i) => {
+            /**@type HTMLElement */
+            let item;
+            if (items.has($$i)) {
+              const pair = items.get($$i);
+              item = pair.item;
+              if (!allRemoved && idx !== pair.idx) {
+                console.log("removed");
+                for (const [_, { item }] of items) {
+                  item.remove();
+                }
+                allRemoved = true;
+              }
+              items.delete($$i);
+            } else {
+              item = element.cloneNode(true);
+              item.removeAttribute("id");
+              item.removeAttribute("for.");
+              if (item.updateModel) {
+                item.model = $$i;
+              } else {
+                item.modelBeforeInit = $$i;
+              }
+              const context = Object.create(element.context);
+              context[varName] = $$i;
+              context.tmpCtxName = varName;
+              item.context = context;
+            }
+            parent.insertBefore(item, comment);
+            newItems.set($$i, { idx, item });
+            binding(item);
+            idx++;
+          }));
+        };
+        update();
+        let lastContext = element.context;
+        comment.updateWhenModelChange = () => {
+          if (lastContext === element.context) {
+            return;
+          }
+          lastContext = element.context;
+          update();
+        };
+        onprop(collectionName, element.context, update);
+        return {};
+      };
+
+      const bindingIfInstruction = (/**@type HTMLElement */ element) => {
+        let ifExp = element.getAttribute("if.");
+        const comment = document.createComment(element.outerHTML);
+        const parent = element.parentElement;
+        parent.insertBefore(comment, element);
+        element.remove();
+        let item;
+        const update = () => {
+          const value = evalInContext(ifExp, element.context);
+          if (value) {
+            if (item) {
+              return;
+            }
+            item = element.cloneNode(true);
+            item.removeAttribute("if.");
+            parent.insertBefore(item, comment);
+            item.context = element.context;
+            binding(item);
+          } else if (item) {
+            item.remove();
+            item = null;
+          }
+        };
+        update();
+        let lastContext = element.context;
+        comment.updateWhenModelChange = () => {
+          if (lastContext === element.context) {
+            return;
+          }
+          lastContext = element.context;
+          update();
+        };
+        for (const exp of getPropsFromExp(ifExp)) {
+          onprop(exp, element.context, update);
+        }
+        return {};
+      };
+
+      const getPropNameFromBindingAttr = (attr) => {
+        return attr.replace(/-(\w)/g, (_, c) => c.toUpperCase());
+      };
+
+      const getPropsFromExp = (exp) => {
+        return exp.match(/[a-zA-Z0-9_$.]+/g) || [];
+      };
+
+      const bindingAttrs = (/**@type HTMLElement */ element) => {
+        if (element.hasAttribute("for.")) {
+          return bindingForInstruction(element);
+        }
+        if (element.hasAttribute("if.")) {
+          return bindingIfInstruction(element);
+        }
+        if (element.updateWhenModelChange) {
+          element.updateWhenModelChange();
+          return element;
+        }
+        const bindingAttrs = element
+          .getAttributeNames()
+          .filter((p) => p.endsWith("."));
+        for (const prop of bindingAttrs) {
+          const $$exp = element.getAttribute(prop);
+          const effectedAttr = prop
+            .slice(0, -".".length)
+            .split(",")
+            .map((a) => a.trim())
+            .filter((a) => a);
+
+          if (effectedAttr.some((a) => a.startsWith("on"))) {
+            const value = `(function($event){with(this){${$$exp}}}).call(event.target.context, event)`;
+            for (const ea of effectedAttr) {
+              if (ea.endsWith("$")) {
+                element.setAttribute(
+                  ea.slice(0, -1),
+                  "event.stopPropagation();" + value
+                );
+              } else {
+                element.setAttribute(ea, value);
+              }
+            }
+            continue;
+          }
+          const update = () => {
+            const value = evalInContext($$exp, element.context);
+            for (const ea of effectedAttr) {
+              if (ea === "model") {
+                if (element.updateModel) {
+                  element.updateModel(value);
+                } else {
+                  element.modelBeforeInit = value;
+                }
+                continue;
+              }
+              if (ea.startsWith("class-")) {
+                const className = ea.slice("class-".length);
+                if (value) {
+                  element.classList.add(className);
+                } else {
+                  element.classList.remove(className);
+                }
+                continue;
+              } else if (ea.startsWith("style-")) {
+                const prop = ea.slice("style-".length, -1);
+                element.style.setProperty(prop, value);
+                continue;
+              }
+              if (ea.endsWith("$")) {
+                let prop = getPropNameFromBindingAttr(ea.slice(0, -1));
+                switch (prop) {
+                  case "innerHtml":
+                    prop = "innerHTML";
+                    break;
+                }
+                element[prop] = value;
+                continue;
+              }
+              if (value === undefined || value === null) {
+                element.removeAttribute(ea);
+              } else if (element[ea] !== value) {
+                element.setAttribute(ea, value);
+              }
+            }
+          };
+          update();
+          for (const exp of getPropsFromExp($$exp)) {
+            onprop(exp, element.context, update);
+          }
+        }
+        return element;
+      };
+
+      const binding = (/**@type HTMLElement */ element) => {
+        /**@type { Object.<string,HTMLElement> } */
+        const components = element.context.components;
+        if (element.hasAttribute) {
+          const handler = bindingAttrs(element);
+          //collect ids
+          if (element.hasAttribute("id")) {
+            components[element.getAttribute("id")] = handler;
+          }
+          if (handler !== element) {
+            return;
+          }
+        }
+        for (const child of [...element.children]) {
+          if (
+            child.context == element.context ||
+            (child.context &&
+              Object.getPrototypeOf(child.context) === element.context)
+          ) {
+          } else {
+            child.context = element.context;
+          }
+          binding(child);
+        }
+      };
+
+      const getNameFromTagName = (tagName) => {
+        return tagName.replace(/(?:^|-)(\w)/g, (_, c) => c.toUpperCase());
+      };
+
+      const registerProperties = (obj, ...props) => {
+        if (!obj.define) {
+          addPropChange(obj);
+        }
+        props.forEach((prop) => {
+          let propValue;
+          let [propName, handler] =
+            prop instanceof Array ? prop : [prop, undefined];
+          Object.defineProperty(obj, propName, {
+            get() {
+              return propValue;
+            },
+            set(newValue) {
+              const oldValue = propValue;
+              propValue = newValue;
+              obj.raise(propName, newValue, oldValue);
+              handler?.(newValue, oldValue);
+            },
+          });
+        });
+      };
+
+      const addPropChange = (/**@type { Object } */ obj) => {
+        /**@type Map<string, Set<{(newValue, oldValue):any}>> */
+        const listeners = new Map();
+        obj.define = (...props) => registerProperties(obj, ...props);
+        obj.on = (/**@type string */ prop, listener) => {
+          if (!listeners.has(prop)) {
+            listeners.set(prop, new Set());
+          }
+          listeners.get(prop).add(listener);
+        };
+        obj.off = (prop, listener) => {
+          if (!listeners.has(prop)) {
+            return;
+          }
+          listeners.get(prop).delete(listener);
+        };
+        obj.raise = (prop, newValue, oldValue) => {
+          if (!listeners.has(prop)) {
+            return;
+          }
+          for (const listener of listeners.get(prop)) {
+            listener(newValue, oldValue);
+          }
+        };
+      };
+
+      const registerElement = (tagName, /**@type { string } */ constructor) => {
+        const elementClassName = `HTML${
+          constructor || getNameFromTagName(tagName)
+        }Element`;
+        constructor = constructor || "Object";
+        eval(`
+    class ${elementClassName} extends HTMLElement{
+      constructor(){
+        super()
+        const shadow = this.attachShadow({mode:'open'})
+        const template = document.getElementById('${tagName}')
+        if(!template || template.tagName !== 'TEMPLATE' ){
+          throw new Error('Define Template')
+        }
+        this.template_ = template
+        this.shadow_ = shadow
+        this.model_ = new ${constructor}()
+        this.model_.components = { host: this.shadow_ }
+        if(this.context && this.hasAttribute('model.')){
+          const modeExp = this.getAttribute('model.')
+          this.model = evalInContext(modeExp, this.context)
+        }else if(this.modelBeforeInit){
+          this.model = this.modelBeforeInit
+        }else{
+          this.model =  {}
+        }
+      }
+
+      rebuildView(){
+        this.shadow_.innerHTML = ''
+        const instance = document.importNode(this.template_.content, true)
+        this.shadow_.appendChild(instance)
+      }
+  
+      get model(){
+        return this.model_
+      }
+  
+      set model(value){
+        //combine code behind with model
+        Object.assign(this.model_, value)
+        this.shadow_.context = this.model_ 
+        this.rebuildView()
+      }
+  
+      updateModel(value){
+        this.model = value
+        this.connectedCallback()
+      }
+      
+      connectedCallback(){
+        binding(this.shadow_)
+        if(this.model_.launch){
+          this.model_.launch()
+        } 
+      }
+    }
+    customElements.define('${tagName}', ${elementClassName})
+    `);
+      };
+      return { registerElement, registerProperties };
+    })();
+
+    const sleep = (timeout) =>
+      new Promise((resolve) => setTimeout(resolve, timeout));
+
+    class AppBase {
+      async launch() {
+        this.storage = this.initStorage_();
+        this.data = await this.initData(window.appData);
+        window.app = this;
+        await this.start();
+      }
+
+      async registerStorageProperties(...props) {
+        if (!this.storage) {
+          return;
+        }
+        let asyncTimeout = 50;
+        const bgTimeout = 200;
+        for (const [prop, defaultValue, onchange] of props) {
+          let propValue;
+          let valueModified = false;
+          let successLoadFromStorage = false;
+          let loadFunc;
+          let bgLoad = false;
+          const mergeValue = (savedValue) => {
+            if (successLoadFromStorage) {
+              return;
+            }
+            successLoadFromStorage = true;
+            if (!valueModified) {
+              valueModified = true;
+              propValue = savedValue;
+            } else {
+              // merge strategy
+              propValue = savedValue;
+            }
+            if (bgLoad && onchange) {
+              onchange();
+            }
+          };
+          loadFunc = async () => {
+            const jsonStr = await this.storage.getItem(prop);
+            let savedValue;
+            if (!jsonStr) {
+              savedValue = defaultValue;
+            } else {
+              try {
+                savedValue = JSON.parse(jsonStr);
+              } catch {
+                savedValue = defaultValue;
+              }
+            }
+            mergeValue(savedValue);
+          };
+          const tryLoad = async () => {
+            bgLoad = true;
+            const func = loadFunc;
+            loadFunc = null;
+            await Promise.race([
+              func(),
+              sleep(bgTimeout).then(() => {
+                if (!successLoadFromStorage) {
+                  loadFunc = func;
+                }
+              }),
+            ]);
+          };
+          await Promise.race([
+            loadFunc(),
+            sleep(asyncTimeout).then(() => {
+              if (!valueModified) {
+                propValue = defaultValue;
+                valueModified = true;
+                asyncTimeout = 0;
+              }
+            }),
+          ]);
+          Object.defineProperty(this, prop, {
+            get() {
+              if (loadFunc) {
+                tryLoad();
+              }
+              return propValue;
+            },
+            set(newValue) {
+              propValue = newValue;
+              if (successLoadFromStorage) {
+                this.storage.setItem(prop, JSON.stringify(propValue));
+              }
+            },
+          });
+        }
+      }
+
+      initStorage_() {
+        if (window.$localStorage) {
+          return window.$localStorage;
+        }
+        try {
+          const s = window.localStorage;
+          return s;
+        } catch {
+          return {
+            getItem: () => "",
+            setItem: () => true,
+          };
+        }
+      }
+
+      async initData(data) {
+        return data;
+      }
+
+      async start() {
+        console.log("start");
+      }
+
+      async pause() {
+        console.log("pause");
+      }
+
+      async resume() {
+        console.log("pause");
+      }
+
+      async stop() {
+        console.log("stop");
+      }
+    }
+
+    window.onload = async () => {
+      Object.setPrototypeOf(App.prototype, AppBase.prototype);
+      for (const template of document.querySelectorAll(
+        "template[id][view-model]"
+      )) {
+        const tagName = template.getAttribute("id");
+        if (!tagName) {
+          continue;
+        }
+        const codeBehind = template.getAttribute("view-model");
+        registerElement(tagName, codeBehind);
+      }
+    };
+  </script>
+
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+
+  <body>
+    <app-main></app-main>
+
+    <template id="h-stack" view-model>
+      <slot></slot>
+      <style>
+        :host {
+          display: flex;
+          flex-direction: row;
+        }
+      </style>
+    </template>
+    <template id="v-stack" view-model>
+      <slot></slot>
+      <style>
+        :host {
+          display: flex;
+          flex-direction: column;
+        }
+      </style>
+    </template>
+    <template id="hv-stack" view-model>
+      <slot></slot>
+      <style>
+        :host {
+          display: flex;
+          flex-direction: column;
+        }
+        @media (orientation: landscape) {
+          :host {
+            flex-direction: row;
+          }
+        }
+      </style>
+    </template>
+
+    <template id="h-spacer" view-model>
+      <slot></slot>
+      <style>
+        :host {
+          flex: 1;
+          display: flex;
+        }
+      </style>
+    </template>
+
+    <template id="h-text" view-model>
+      <span inner-text$.="content"></span>
+      <style>
+        :host {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          place-content: center;
+        }
+      </style>
+    </template>
+
+    <template id="play-button" view-model>
+      <span id="btnPlay" class="play-button" class-pause.="isPlaying"></span>
+      <style>
+        :host {
+          display: block;
+          border-radius: 5px;
+          padding: 3px 10px;
+          background-color: #fff4;
+        }
+        .play-button {
+          display: block;
+          width: 100%;
+          height: 100%;
+          background-color: var(--color);
+          clip-path: polygon(25% 10%, 25% 90%, 95% 50%, 25% 10%);
+          transition: 200ms all ease-in-out;
+        }
+        .play-button.pause {
+          clip-path: polygon(
+            60% 50%,
+            20% 20%,
+            20% 80%,
+            60% 50%,
+            60% 80%,
+            80% 80%,
+            80% 20%,
+            60% 20%
+          );
+        }
+      </style>
+    </template>
+
+    <template id="menu-bar" view-model>
+      <h-stack>
+        <div class-hidden.="!item.show" class="menu-item" for.="item of menus">
+          <span inner-text$.="item.name" onclick.="item.onclick()"></span>
+        </div>
+      </h-stack>
+      <style>
+        :host {
+          display: block;
+        }
+        h-stack {
+          overflow: hidden;
+        }
+        .menu-item {
+          margin: 5px;
+          background-color: var(--menu-background-color);
+          border-radius: 4px;
+          padding: 2px 5px;
+          color: var(--menu-color);
+          display: flex;
+          justify-content: center;
+          flex: 1;
+        }
+        .menu-item > span {
+          display: block;
+          text-overflow: ellipsis;
+          white-space: pre;
+          overflow: hidden;
+          max-width: 6em;
+        }
+        .hidden {
+          display: none;
+        }
+      </style>
+    </template>
+
+    <script>
+      class MenuItem {
+        constructor(name = "", onclick = null, show = true) {
+          registerProperties(this, "name", "show");
+          this.name = name;
+          this.show = show;
+          this.onclick = onclick;
+        }
+      }
+    </script>
+
+    <template id="modal-panel" view-model="Modal">
+      <span class-hidden.="!toastMessage" inner-text$.="toastMessage"></span>
+      <style>
+        .hidden {
+          /* left: -100%; */
+          /* transition: ease-in-out 0.05s left; */
+          display: none;
+        }
+        span {
+          color: var(--toast-color, #eee);
+          background-color: var(--toast-background-color, #0008);
+          position: fixed;
+          bottom: 0;
+          margin: 20px auto;
+          left: 50%;
+          transform: translate(-50%, 0);
+          padding: 5px 20px;
+          border-radius: 4px;
+          text-align: center;
+          backdrop-filter: blur(5px);
+        }
+      </style>
+    </template>
+    <script>
+      class Modal {
+        constructor() {
+          /**@type { Object.<string,HTMLElement> } */
+          this.components;
+          /**@type { Storage | {  } } */
+          this.storage;
+          registerProperties(this, "toastMessage");
+        }
+        toast(/**@string */ msg, /**@type number */ timeout = 1000) {
+          return new Promise((resolve) => {
+            this.toastMessage = msg;
+            setTimeout(() => {
+              this.toastMessage = null;
+              resolve();
+            }, timeout);
+          });
+        }
+      }
+    </script>
+    <template id="pop-up" view-model="Popup">
+      <div class="popup">
+        <slot></slot>
+      </div>
+      <style>
+        :host {
+          display: block;
+          position: relative;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          right: 0;
+          position: fixed;
+          background: #0008;
+          backdrop-filter: blur(5px);
+        }
+        .popup {
+          max-width: 99%;
+          max-height: 99%;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+      </style>
+    </template>
+    <script>
+      class Popup {}
+    </script>
+  </body>
+</html>

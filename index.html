@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>💗播放器</title>
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0,user-scalable=no, initial-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <script src="./bootstrap.bundle.min.js"></script>
+    <script src="./index.js"></script>
+    <link href="./bootstrap.min.css" rel="stylesheet">
+    <link href="./index.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <div class="playerWraper">
+            <div id="player">
+                <div class="disc"></div>
+                <div class="hiddenOnAllLrc" id="playName">💗播放器</div>
+                <div class="hiddenOnAllLrc spacer"></div>
+                <div class="hiddenOnAllLrc spacer"></div>
+                <audio id="audio"></audio>
+                <video id="video" playsinline></video>
+                <div class="hiddenOnAllLrc" id="playProgress"></div>
+                <div class="hiddenOnAllLrc" id="playMessage">@版权所有</div>
+                <div class="hiddenOnAllLrc" id="playNextMessage">我像只鱼儿在你的身上，游啊游啊游啊游</div>
+                <div class="hiddenOnAllLrc spacer"></div>
+                <div class="showOnAllLrc" id="allLrc"></div>
+            </div>
+            <div class="float-menus">
+                <span id="btnRefresh">REFR</span>
+                <span id="btnLoop">LOOP</span>
+                <span id="btnPreventLock">KEEP</span>
+                <span id="btnFun" class="hiddenWhenDict">GAME</span>
+                <span id="btnDict">DICT</span>
+                <!-- <span id="btnFun">APPS</span>
+                <span id="btnLoop">LOOP</span> -->
+            </div>
+        </div>
+        <div class="progress">
+            <div id="playPgr" class="progress-bar bg-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0"
+                aria-valuemax="100"></div>
+        </div>
+        <div class="listWraper hiddenWhenDict">
+            <div id="list-panel">
+                <div id="current"></div>
+                <div id="list" class="list-group"></div>
+            </div>
+            <div id="controller">
+                <input id="btnPre" disabled type="button" class="btn btn-success" value="上句" />
+                <!-- <div class="spacer"></div> -->
+                <input id="btnA" type="button" class="btn btn-secondary btn-round" value="A->" />
+                <input id="btnPlayOrPause" disabled type="button" class="btn btn-warning" value="播/停" />
+                <input id="btnB" disabled type="button" class="btn btn-secondary btn-round" value="<-B" />
+                <!-- <div class="spacer"></div> -->
+                <input id="btnNext" disabled type="button" class="btn btn-success" value="下句" />
+            </div>
+        </div>
+        <div class="appWraper hiddenWhenDict">
+            <div id="appList"></div>
+            <iframe id="ifmApp" src="about:blank"></iframe>
+        </div>
+        <div class="showWhenDict">
+            <iframe id="ifmDict" src="./apps/monoliths/_Dict.html"></iframe>
+        </div>
+    </div>
+    <template id="listItemTemplate">
+        <div class="list-item list-group-item"><span class="name"></span><span class="date"></span><span
+                class="spacer"></span><span class="type"></span></div>
+    </template>
+    <template id="appItemTemplate">
+        <div class="app-item">
+            <span class="title"></span>
+            <div class="desc"></div>
+        </div>
+    </template>
+</body>
+
+</html>

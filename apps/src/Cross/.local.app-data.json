@@ -1,0 +1,6 @@
+{
+    "DEFAULT_R": 0.8,
+    "RANDOM": true,
+    "DATA_PATH": "http://192.168.3.100/V.%E8%A7%86%E9%A2%91/Player/data/crosswords/difficult/",
+    "APP_NAME": "Cross"
+}

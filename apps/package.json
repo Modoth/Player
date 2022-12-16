@@ -1,0 +1,26 @@
+{
+  "name": "js_node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "spack.config.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "lint/dist": "(npx eslint --fix dist/**/*.js 2> /dev/null || true) && npx prettier --write dist/**/*.{html,css}",
+    "build": "node tools/spack/index.js publish && npm run lint/dist && npm run deploy",
+    "rebuild": "npm run clean && npm run build",
+    "start": "node tools/spack/index.js serve --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "(rm -rf monoliths || true) && mkdir monoliths && (cd dist && ls -I \"fast.*\" -I \"*Cross.*\" | xargs -I% cp % ../monoliths/ )"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^7.13.0",
+    "eslint-config-standard": "^16.0.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "prettier": "2.1.2"
+  }
+}

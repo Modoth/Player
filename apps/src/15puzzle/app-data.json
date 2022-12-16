@@ -1,0 +1,5 @@
+{
+    "randImageRoot": "/P.%E5%9B%BE%E7%89%87/puzzles/",
+    "defaultImageUrl": "/** @imports image */ './bg.jpg'",
+    "ranks": [3, 4, 6, 10]
+  }
